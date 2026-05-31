@@ -1,5 +1,9 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from 'express';
 import webhookRoutes from './routes/webhook.routes';
+
 
 const app = express();
 
