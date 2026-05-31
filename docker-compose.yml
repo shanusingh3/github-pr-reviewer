@@ -1,0 +1,11 @@
+services:
+  api:
+    build:
+      context: ./apps/api
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/api/.env
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
