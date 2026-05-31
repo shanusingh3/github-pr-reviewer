@@ -1,8 +1,8 @@
 import {Router} from 'express';
-import { githubWebook } from '../controllers/webhook.controller';
+import { githubWebook, verifyGithubSignature } from '../controllers/webhook.controller';
 
 const router = Router();
 
-router.post('/github', githubWebook);
+router.post('/github', verifyGithubSignature, githubWebook);
 
 export default router;
