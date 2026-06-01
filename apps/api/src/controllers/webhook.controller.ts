@@ -1,33 +1,81 @@
-import { Request, Response } from 'express';
-import { getPullRequestFiles } from '../services/github.services';
+import { Request, Response } from "express";
+import { repositoryService } from "../services/repository.service";
+import { indexingRepoQueue, reviewPRQueue } from "../queue/indexing.queue";
 
-export const githubWebook = async (req: Request, res: Response) => {
-    console.log({
-        action: req.body.action,
-        repository: req.body.repository?.name,
-        prNumber: req.body.pull_request?.number,
-        title: req.body.pull_request?.title,
-    });
 
-    const owner =
-        req.body.repository.owner.login;
+export const githubWebook = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const owner = req.body.repository.owner.login;
+        const repo = req.body.repository.name;
+        const pullNumber = req.body.pull_request.number;
+        const defaultBranch =
+            req.body.repository.default_branch;
 
-    const repo =
-        req.body.repository.name;
+        let repository =
+            await repositoryService.findByOwnerAndName(
+                owner,
+                repo
+            );
 
-    const pullNumber =
-        req.body.pull_request.number;
+        if (!repository) {
+            repository =
+                await repositoryService.create({
+                    owner,
+                    name: repo,
+                    defaultBranch,
+                });
 
-    const files = await getPullRequestFiles(
-        owner,
-        repo,
-        pullNumber
-    );
+            console.log(
+                `Repository created: ${owner}/${repo}`
+            );
+        }
 
-    console.log(files);
+        /**
+      * First time repository
+      */
+        if (!repository.lastIndexedSHA) {
+            await indexingRepoQueue.add(
+                "full-index",
+                {
+                    repositoryId: repository.id,
+                    owner,
+                    repo,
+                    pullNumber,
+                }
+            );
 
-    res.status(200).json({
-        success: true,
-        message: 'Webhook received'
-    });
-}
+            console.log(
+                `Full indexing queued for ${owner}/${repo}`
+            );
+        } else {
+            await reviewPRQueue.add(
+                "review-pr",
+                {
+                    repositoryId: repository.id,
+                    owner,
+                    repo,
+                    pullNumber,
+                }
+            );
+
+            console.log(
+                `Review queued for PR #${pullNumber}`
+            );
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Job queued",
+        });
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
