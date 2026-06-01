@@ -1,9 +1,18 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from 'express';
 import webhookRoutes from './routes/webhook.routes';
 
+
 const app = express();
 
-app.use(express.json());
+app.use(express.json({
+    verify: (req, res, buf) => {
+        (req as any).rawBody = buf;
+        console.log('Raw request body:', buf.toString());
+    }
+}));
 
 app.get('/health', (_, res) => {
     res.status(200).json({

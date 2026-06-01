@@ -7,16 +7,21 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.ts"
+    "start": "node dist/server.ts",
+    "create-repo": "npx prisma migrate dev --name create_repository",
+    "docker-logs": "docker compose logs -f"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@octokit/rest": "^22.0.1",
+    "@prisma/client": "6",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "prisma": "6"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
