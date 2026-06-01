@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "worker": "ts-node-dev --respawn --transpile-only src/workers/indexing.worker.ts",
     "build": "tsc",
     "start": "node dist/server.ts",
     "create-repo": "npx prisma migrate dev --name create_repository",
@@ -18,9 +19,11 @@
   "dependencies": {
     "@octokit/rest": "^22.0.1",
     "@prisma/client": "6",
+    "bullmq": "^5.77.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "ioredis": "^5.11.0",
     "prisma": "6"
   },
   "devDependencies": {

@@ -36,6 +36,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  worker:
+    build:
+      context: ./apps/api
+    command: yarn worker
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+    depends_on:
+      - redis
+
 volumes:
   qdrant_storage:
   postgres_data:
