@@ -9,3 +9,33 @@ services:
     volumes:
       - ./apps/api:/app
       - /app/node_modules
+
+  rag-service:
+    build:
+      context: ./apps/rag-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/rag-service:/app
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  postgres:
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: pr_reviewer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  qdrant_storage:
+  postgres_data:
