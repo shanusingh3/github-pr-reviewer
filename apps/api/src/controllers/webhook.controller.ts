@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getPullRequestFiles } from '../services/github.services';
+import { repositoryService } from '../services/repository.service';
 
 export const githubWebook = async (req: Request, res: Response) => {
     console.log({
@@ -17,6 +18,29 @@ export const githubWebook = async (req: Request, res: Response) => {
 
     const pullNumber =
         req.body.pull_request.number;
+
+    const defaultBranch =
+        req.body.repository.default_branch;
+
+
+    let repository =
+        await repositoryService.findByOwnerAndName(
+            owner,
+            repo
+        );
+
+    if (!repository) {
+        repository =
+            await repositoryService.create({
+                owner,
+                name: repo,
+                defaultBranch,
+            });
+
+        console.log(
+            `Repository created: ${owner}/${repo}`
+        );
+    }
 
     const files = await getPullRequestFiles(
         owner,
